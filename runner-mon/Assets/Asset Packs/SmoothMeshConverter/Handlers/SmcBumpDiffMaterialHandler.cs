@@ -9,6 +9,7 @@ namespace BzKovSoft.SmoothMeshConverter.Handlers
 		private float _noiseScale = 0.04f;
 		private readonly Texture _substitudeTexture;
 		private readonly Texture _substitudeNormalMap;
+		public Material shaderMaterial;
 		private SMConverter _converter;
 
 		List<MaterialBackup> _backups;
@@ -42,7 +43,7 @@ namespace BzKovSoft.SmoothMeshConverter.Handlers
 				for (int i = 0; i < backup.oldMaterials.Length; i++)
 				{
 					var oldMat = backup.oldMaterials[i];
-					var newMat = new Material(Shader.Find("Custom/BzKovSoft/FadeToDiffTex"));
+					Material newMat = shaderMaterial;
 					newMat.SetTexture("_MainTex", oldMat.mainTexture);
 					newMat.SetTexture("_SubstituteTex", _substitudeTexture);
 					newMat.SetTexture("_SubstituteBumpMap", _substitudeNormalMap);
