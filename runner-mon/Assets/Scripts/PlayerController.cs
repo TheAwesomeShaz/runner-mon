@@ -8,6 +8,8 @@ using TMPro;
 public class PlayerController : MonoBehaviour
 {
     [Header("Floats")]
+    [SerializeField] float attackDamage = 10;
+    [SerializeField] float health = 100;
     [SerializeField] float runSpeed;
     [SerializeField] float leftRightSpeed;
     [SerializeField] float evolveSpeed;
@@ -24,8 +26,10 @@ public class PlayerController : MonoBehaviour
     float initialScale = 0.1f;
 
     [Header("Booleans")]
+    public bool isAlive;
     [SerializeField] bool isRunning;
-    [SerializeField] bool canAttack;
+    public bool canAttack;
+    public bool hasStartedAttack;
     public bool hasReachedEnd;
     public bool isEvolving;
     public bool hasEvolved;
@@ -50,8 +54,18 @@ public class PlayerController : MonoBehaviour
     //UI Stuff
     [Header("UI Stuff")]
     [SerializeField] GameObject plusOneCanvas;
+    [SerializeField] GameObject minusOneCanvas;
+    [SerializeField] TextMeshProUGUI sliderText;
     [SerializeField] Slider slider;
     [SerializeField] TextMeshProUGUI text;
+    [SerializeField] Slider playerHealthSlider;
+    [SerializeField] Slider enemyHealthSlider;
+    public TextMeshProUGUI tapToAttackText;
+    [SerializeField] TextMeshProUGUI playerNameText;
+    [SerializeField] TextMeshProUGUI enemyNameText;
+    [SerializeField] GameObject levelCompletePanel;
+    [SerializeField] GameObject levelFailedPanel;
+    [SerializeField] GameObject restartButton;
 
     [Header("VFX")]
     [SerializeField] GameObject fireTypeEvolveExplosion;
@@ -59,6 +73,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] GameObject smallTailFireVFX;
     [SerializeField] GameObject bigTailFireVFX;
     public GameObject fireBallFX;
+    public GameObject waterBallFX;
 
     [Header("Materials")]
     [SerializeField] Material fireTypeEvolveEffectMaterial;
@@ -68,7 +83,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Positions")]
     public Transform fireBallPos;
-
+    public Transform[] waterBallPos;
 
     Rigidbody rb;
     Animator anim;
@@ -81,13 +96,13 @@ public class PlayerController : MonoBehaviour
     Vector3 scale = new Vector3(.1f, .1f, .1f);
     Vector3 targetPos;
 
-
     public static PlayerController instance;
     private float _xAxis;
 
     private void Awake()
     {
         instance = this;
+        isAlive = true;
     }
 
     private void Start()
@@ -105,8 +120,18 @@ public class PlayerController : MonoBehaviour
         waterMon.SetActive(false);
         blastoise.SetActive(false);
 
+        // UI Stuff
         slider.gameObject.SetActive(false);
         text.gameObject.SetActive(false);
+        playerHealthSlider.gameObject.SetActive(false);
+        enemyHealthSlider.gameObject.SetActive(false);
+        tapToAttackText.gameObject.SetActive(false);
+        playerNameText.gameObject.SetActive(false);
+        enemyNameText.gameObject.SetActive(false);
+
+        levelCompletePanel.SetActive(false);
+        levelFailedPanel.SetActive(false);
+        restartButton.SetActive(true);
 
         // set waterPokemon stuff inactive and blendshape weight to 0
         foreach (GameObject thing in wartortleStuff)
@@ -155,33 +180,80 @@ public class PlayerController : MonoBehaviour
         Evolve();
         FinalEvolveIncrease();
         Attack();
+        if (hasReachedEnd && Input.GetMouseButtonDown(0))
+        {
+            hasStartedAttack = true;
+        }
     }
 
     private void Attack()
     {
         if (canAttack && Input.GetMouseButtonDown(0) && hasReachedEnd)
         {
-            EnableAttackUI();
             if (isFireType)
             {
                 charizard.GetComponent<Animator>().SetTrigger("Attack");
-                // instantiate fire fx at some position
+                // instantiate fire fx using animation event (done in fireballscript)
             }
             else if (isWaterType)
             {
-                // blastoise attack or just stand idle
+                blastoise.GetComponent<Animator>().SetTrigger("Attack");
                 // instantiate water cannon fx at some position
             }
+
+            // Enemy Spawner is same for blastoise and charizard due to some reason lol so this will work
+            EnemySpawner.instance.TakeDamage(attackDamage);
+        }
+
+    }
+
+    public void TakeDamage(float damage)
+    {
+        if (health > 0)
+        {
+            health -= damage;
+            print("Player got hit now health is " + health);
+            GetHurt();
+        }
+        else
+        {
+            Die();
         }
     }
 
 
-
-    private void EnableAttackUI()
+    private void Die()
     {
-        text.gameObject.SetActive(false);
-        slider.gameObject.SetActive(false);
+        if (PlayerController.instance.isFireType)
+        {
+            charizard.GetComponent<Animator>().SetTrigger("Die");
+        }
+
+        if (PlayerController.instance.isWaterType)
+        {
+            blastoise.GetComponent<Animator>().SetTrigger("Die");
+
+        }
+        isAlive = false;
+        LevelEnd(0);
     }
+
+    public void GetHurt()
+    {
+
+        if (PlayerController.instance.isFireType)
+        {
+            charizard.GetComponent<Animator>().SetTrigger("Hurt");
+
+        }
+
+        if (PlayerController.instance.isWaterType)
+        {
+            blastoise.GetComponent<Animator>().SetTrigger("Hurt");
+        }
+
+    }
+
 
     private void FixedUpdate()
     {
@@ -191,7 +263,7 @@ public class PlayerController : MonoBehaviour
     void HandleRunning()
     {
         //Start running on Tap
-        if (Input.GetMouseButtonDown(0) && GameController.instance.isPlaying && !isRunning && !hasReachedEnd)
+        if ((Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0)) && (!isRunning && !hasReachedEnd))
         {
             anim.SetBool("Running", true);
             ballAnim.SetBool("Roll", true);
@@ -289,7 +361,7 @@ public class PlayerController : MonoBehaviour
 
             if (scale.x < waterTypeEvolveLimit)
             {
-                Debug.Log("ChangeMaterials to evolve!! scale is less than limit");
+                // Debug.Log("ChangeMaterials to evolve!! scale is less than limit");
                 waterTypeMeshRenderer.sharedMaterial = waterTypeEvolveEffectMaterials[0];
 
                 //lerp is just lightening the color so we are not doing that
@@ -403,6 +475,9 @@ public class PlayerController : MonoBehaviour
             isFireType = false;
             isWaterType = true;
 
+            playerNameText.text = "CANON";
+            enemyNameText.text = "DRAGON";
+
             canExplode = true;
             WaterExplosion();
 
@@ -417,6 +492,9 @@ public class PlayerController : MonoBehaviour
             isFireType = true;
             isWaterType = false;
 
+            playerNameText.text = "DRAGON";
+            enemyNameText.text = "CANON";
+
             canExplode = true;
             FireExplosion();
 
@@ -428,19 +506,16 @@ public class PlayerController : MonoBehaviour
         else if (other.tag == "EndTag")
         {
             isRunning = false;
+            charizard.GetComponent<Animator>().SetTrigger("Hurt");
+            blastoise.GetComponent<Animator>().SetTrigger("Hurt");
+            CamFollow.instance.isAttackCam = true;
             canAttack = true;
             hasReachedEnd = true;
-            if (isFireType)
-            {
-                // play charizard normal attack anim?
-                // on tap attack will be true then a function in update will become enabled
-            }
+            EnableAttackUI();
 
-            if (isWaterType)
-            {
-                //play blastoise attack anim?
-                // on tap attack will be true then a function in update will become enabled
-            }
+
+            //Bring the player to the center
+            transform.position = new Vector3(0f, transform.position.y, transform.position.z);
         }
     }
 
@@ -458,8 +533,7 @@ public class PlayerController : MonoBehaviour
         // they are not of the same type then do nothing or prolly decrease?
         else if ((!isFirePickup && isFireType) || (isFirePickup && !isFireType))
         {
-            plusOneCanvas.SetActive(false);
-            // print("oof");
+            MinusOneVFX();
             UnCollectStuff();
         }
     }
@@ -475,40 +549,41 @@ public class PlayerController : MonoBehaviour
 
     public void CollectStuff()
     {
-        if (stuffCollected < 10)
+        if (stuffCollected < 30)
         {
             stuffCollected++;
         }
         if (stuffCollected == 10)
         {
             isEvolving = true;
+            if (!hasEvolved)
+            {
+                Evolve();
+            }
+            if (!hasEvolvedFinal)
+            {
+                // stuffCollected = 0;
+            }
+            // if(isFireType)
+            hasEvolved = true;
+            // Debug.Log("Evolve Set to true");
+
+        }
+        if (stuffCollected == 20)
+        {
             if (hasEvolved && !hasEvolvedFinal)
             {
                 isEvolving = true;
                 canFinalEvolve = true;
 
                 // print("conditions enabled so that finalEvolveIncrease() van be called");
-                stuffCollected = 0;
+                // stuffCollected = 0;
                 //this will enable the FinalEvolveIncrease() call in update
-            }
-            else
-            {
-                if (!hasEvolved)
-                {
-                    Evolve();
-                }
-                if (!hasEvolvedFinal)
-                {
-                    stuffCollected = 0;
-                }
-                // if(isFireType)
-                hasEvolved = true;
-                // Debug.Log("Evolve Set to true");
-
             }
         }
         UpdateUI();
     }
+
     #endregion
 
     #region VFX Stuff
@@ -558,6 +633,9 @@ public class PlayerController : MonoBehaviour
         slider.gameObject.SetActive(true);
         text.gameObject.SetActive(true);
 
+
+
+
         slider.value = stuffCollected;
         if (!hasEvolved) // small
         {
@@ -601,7 +679,62 @@ public class PlayerController : MonoBehaviour
         Destroy(fx, 2f);
     }
 
-    #endregion 
+    public void MinusOneVFX()
+    {
+        minusOneCanvas.SetActive(true);
+        var fx = Instantiate(minusOneCanvas, transform.position + Vector3.up * 2f, Quaternion.identity);
+        Destroy(fx, 2f);
+    }
+
+    public void EnableAttackUI()
+    {
+        slider.gameObject.SetActive(false);
+        sliderText.gameObject.SetActive(false);
+
+        tapToAttackText.gameObject.SetActive(true);
+
+        playerHealthSlider.gameObject.SetActive(true);
+        enemyHealthSlider.gameObject.SetActive(true);
+
+        playerNameText.gameObject.SetActive(true);
+        enemyNameText.gameObject.SetActive(true);
+    }
+
+    public void UpdateAttackUI()
+    {
+        playerHealthSlider.value = health;
+        enemyHealthSlider.value = EnemySpawner.instance.enemyHealth;
+    }
+
+
+    public void LevelEnd(int status)
+    {
+        tapToAttackText.gameObject.SetActive(false);
+
+        playerHealthSlider.gameObject.SetActive(false);
+        enemyHealthSlider.gameObject.SetActive(false);
+
+        playerNameText.gameObject.SetActive(false);
+        enemyNameText.gameObject.SetActive(false);
+
+        restartButton.SetActive(false);
+
+        if (status == 1)
+        {
+            levelCompletePanel.SetActive(true);
+        }
+        else
+        {
+            levelFailedPanel.SetActive(true);
+
+        }
+
+    }
+
+
+
+
+    #endregion
 
 
 }

@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 public class GameController : MonoBehaviour
 {
     public bool isPlaying;
+    int currSceneIndex;
 
     // GameObject joystick;
     [SerializeField] GameObject startText;
@@ -16,6 +17,7 @@ public class GameController : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        currSceneIndex = SceneManager.GetActiveScene().buildIndex;
     }
 
     // Start is called before the first frame update
@@ -24,7 +26,6 @@ public class GameController : MonoBehaviour
         //TODO: later set this behaviour on tapping once the game starts
         isPlaying = true;
         startText.SetActive(true);
-
 
     }
 
@@ -42,12 +43,25 @@ public class GameController : MonoBehaviour
         if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
         {
             startText.SetActive(false);
-
+            PlayerController.instance.tapToAttackText.gameObject.SetActive(false);
         }
     }
 
     public void RestartLevel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene(currSceneIndex);
     }
+
+    public void NextLevel()
+    {
+        if (currSceneIndex < 2)
+        {
+            SceneManager.LoadScene(currSceneIndex + 1);
+        }
+        else
+        {
+            SceneManager.LoadScene(0);
+        }
+    }
+
 }

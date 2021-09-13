@@ -5,7 +5,7 @@ ModelImporter:
   internalIDToNameTable:
   - first:
       74: -7471410921340187495
-    second: char|char|char|AllAction|char|AllAction
+    second: CharizardDie
   - first:
       74: 3018807618672936173
     second: char|char|char|CubeAction.001|char|CubeAction.001
@@ -50,11 +50,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: char|char|char|AllAction|char|AllAction
+      name: CharizardDie
       takeName: char|char|char|AllAction|char|AllAction
       internalID: 0
-      firstFrame: 0
-      lastFrame: 1113
+      firstFrame: 946
+      lastFrame: 982
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
