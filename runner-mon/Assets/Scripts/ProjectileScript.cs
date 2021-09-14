@@ -37,6 +37,10 @@ public class ProjectileScript : MonoBehaviour
             var fx = Instantiate(PlayerController.instance.fireBallFX, enemyFireBallPos.position, Quaternion.Euler(0f, 180f, 0f));
             Destroy(fx, 3f);
             print("enemy is shooting a fireBall");
+            if (!PlayerController.instance.hasEvolvedFinal)
+            {
+                PlayerController.instance.Die();
+            }
         }
 
         // which means that waterEnemyisActive
@@ -48,6 +52,10 @@ public class ProjectileScript : MonoBehaviour
                 var fx = Instantiate(PlayerController.instance.waterBallFX, waterBallPos.position, Quaternion.Euler(0f, 180f, 0f));
                 Destroy(fx, 3f);
 
+            }
+            if (!PlayerController.instance.hasEvolvedFinal)
+            {
+                PlayerController.instance.Die();
             }
 
         }

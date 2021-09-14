@@ -131,12 +131,16 @@ public class EnemySpawner : MonoBehaviour
     {
         if (enemyCanAttack && !isDead && PlayerController.instance.isAlive)
         {
+
             yield return new WaitForSeconds(attackDelay);
             // i.e the water enemy is activated
+
+
             if (PlayerController.instance.isFireType)
             {
                 waterEnemy.GetComponent<Animator>().SetTrigger("Attack");
                 PlayerController.instance.TakeDamage(enemyAttackDamage);
+
 
                 StartCoroutine(EnemyAttack());
             }
@@ -147,6 +151,8 @@ public class EnemySpawner : MonoBehaviour
                 print("Setting attack trigger on charizard");
                 fireEnemy.GetComponent<Animator>().SetTrigger("Attack");
                 PlayerController.instance.TakeDamage(enemyAttackDamage);
+
+
 
                 StartCoroutine(EnemyAttack());
             }

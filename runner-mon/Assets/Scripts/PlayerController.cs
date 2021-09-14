@@ -222,18 +222,31 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    private void Die()
+    public void Die()
     {
         if (PlayerController.instance.isFireType)
         {
             charizard.GetComponent<Animator>().SetTrigger("Die");
+            if (!hasEvolvedFinal)
+            {
+                canExplode = true;
+                FireExplosion();
+                canExplode = false;
+                charmander.SetActive(false);
+            }
         }
 
         if (PlayerController.instance.isWaterType)
         {
             blastoise.GetComponent<Animator>().SetTrigger("Die");
-
+            if (!hasEvolvedFinal)
+            {
+                canExplode = true;
+                WaterExplosion();
+                waterMon.SetActive(false);
+            }
         }
+
         isAlive = false;
         LevelEnd(0);
     }
@@ -303,9 +316,9 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 movePosition = new Vector3(_xAxis * leftRightSpeed * Time.deltaTime, 0f, 1f * runSpeed * Time.deltaTime);
 
-        if (transform.position.x <= -1.2f && movePosition.x < 0)
+        if (transform.position.x <= -.9f && movePosition.x < 0)
             movePosition.x = 0f;
-        else if (transform.position.x >= 1.2f && movePosition.x > 0)
+        else if (transform.position.x >= .9f && movePosition.x > 0)
             movePosition.x = 0f;
 
         rb.velocity = movePosition * leftRightSpeed * Time.deltaTime;
@@ -512,6 +525,11 @@ public class PlayerController : MonoBehaviour
             canAttack = true;
             hasReachedEnd = true;
             EnableAttackUI();
+            if (!hasEvolvedFinal)
+            {
+                anim.GetComponent<Animator>().speed = 0;
+                waterMon.GetComponent<Animator>().speed = 0;
+            }
 
 
             //Bring the player to the center
@@ -549,11 +567,11 @@ public class PlayerController : MonoBehaviour
 
     public void CollectStuff()
     {
-        if (stuffCollected < 30)
+        if (stuffCollected < 15)
         {
             stuffCollected++;
         }
-        if (stuffCollected == 10)
+        if (stuffCollected == 5)
         {
             isEvolving = true;
             if (!hasEvolved)
@@ -569,7 +587,7 @@ public class PlayerController : MonoBehaviour
             // Debug.Log("Evolve Set to true");
 
         }
-        if (stuffCollected == 20)
+        if (stuffCollected == 10)
         {
             if (hasEvolved && !hasEvolvedFinal)
             {
