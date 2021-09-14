@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+
 public class GameController : MonoBehaviour
 {
     public bool isPlaying;
@@ -26,6 +27,8 @@ public class GameController : MonoBehaviour
         //TODO: later set this behaviour on tapping once the game starts
         isPlaying = true;
         startText.SetActive(true);
+
+        TinySauce.OnGameStarted(levelNumber: (currSceneIndex + 1).ToString());
 
     }
 
@@ -50,10 +53,12 @@ public class GameController : MonoBehaviour
     public void RestartLevel()
     {
         SceneManager.LoadScene(currSceneIndex);
+        TinySauce.OnGameFinished((currSceneIndex + 1).ToString(), false, 0);
     }
 
     public void NextLevel()
     {
+        TinySauce.OnGameFinished((currSceneIndex + 1).ToString(), true, 1);
         if (currSceneIndex < 2)
         {
             SceneManager.LoadScene(currSceneIndex + 1);
