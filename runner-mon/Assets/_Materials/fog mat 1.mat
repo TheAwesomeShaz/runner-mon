@@ -157,7 +157,7 @@ Material:
     - _UseSpecular: 0
     - _ZWrite: 0
     m_Colors:
-    - _BaseColor: {r: 0.4784314, g: 0.8588236, b: 0.8862746, a: 1}
+    - _BaseColor: {r: 0.4431373, g: 0.9058824, b: 0.95294124, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HColor: {r: 1, g: 1, b: 1, a: 1}
@@ -165,5 +165,5 @@ Material:
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _ReflectionColor: {r: 1, g: 1, b: 1, a: 1}
     - _RimColor: {r: 0.8, g: 0.8, b: 0.8, a: 0.5}
-    - _SColor: {r: 0.7837753, g: 0.90603834, b: 0.9716981, a: 1}
+    - _SColor: {r: 0.51174796, g: 0.9041555, b: 0.9433962, a: 1}
     - _SpecularColor: {r: 0.75, g: 0.75, b: 0.75, a: 1}
